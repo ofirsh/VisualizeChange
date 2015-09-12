@@ -6,10 +6,6 @@ library(stringr)
 
 set.seed(47)
 
-data.full <- data.frame(fread("./data/WHSMasterConsultationData-TAB.txt"))
-
-data.full <- read.delim("./data/WHSMasterConsultationData-TAB.txt")
-
 data.full <- read.delim(file = "./data/WHSMasterConsultationData-TAB.txt",
                             # sep = "\t", 
                             # quote = "\"",
@@ -57,4 +53,14 @@ splitted.technology <- str_trim(ldply( splitted, function(x) { return (x[[2]])  
 
 data.melt.nonempty$Need <- splitted.need
 data.melt.nonempty$Technology <- splitted.technology
+data.melt.nonempty$NeedTech <- NULL
 
+# extract the boolean matrix only, and convert the "x" to TRUE and FALSE
+data.melt.nonempty.boolean <- subset( data.melt.nonempty , select = -c(Filename,Need,Technology) )
+data.melt.nonempty.boolean.TF <-  data.melt.nonempty.boolean == "x"
+
+data.final <- cbind( subset( data.melt.nonempty , select = c(Filename,Need,Technology) ), data.melt.nonempty.boolean.TF )
+
+# merge items (typos) and shorten the names
+
+write.csv(data.final,file="./data/data-final.csv")
