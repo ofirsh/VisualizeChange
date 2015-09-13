@@ -1,25 +1,49 @@
 filterDataFrameByCheckboxes <- function(df,input)
 {
-    df.filtered <- df
+    print("filterDataFrameByCheckboxes")
+    
+    print("df")
+    print( dim(df) )
     
     publicInput <- input$checkGroupPublicInput
     
-    if (!( 1 %in% publicInput ))
-        df.filtered <- df.filtered[ df.filtered$Public.Input..Submission.to.WHS == FALSE, ]
+    selectionVector <- logical( length = nrow(df) )
     
-    if (!( 2 %in% publicInput ))
-        df.filtered <- df.filtered[ df.filtered$Public.Input..Survey.Results == FALSE, ]
+    if ( 1 %in% publicInput )
+        selectionVector <- selectionVector | df$Public.Input..Submission.to.WHS 
     
-    if (!( 3 %in% publicInput ))
-        df.filtered <- df.filtered[ df.filtered$Public.Input..Stakeholder.Consultation.Report == FALSE, ]
+    if ( 2 %in% publicInput )
+        selectionVector <- selectionVector | df$Public.Input..Survey.Results
     
-    if (!( 4 %in% publicInput ))
-        df.filtered <- df.filtered[ df.filtered$Public.Input..External.Conference.Report == FALSE, ]
+    if ( 3 %in% publicInput )
+        selectionVector <- selectionVector | df$Public.Input..Stakeholder.Consultation.Report
     
-    if (!( 5 %in% publicInput ))
-        df.filtered <- df.filtered[ df.filtered$Public.Public.Input..Key.document == FALSE, ]
+    if ( 4 %in% publicInput )
+        selectionVector <- selectionVector | df$Public.Input..External.Conference.Report
     
-    return (data.table(df.filtered))
+    if  ( 5 %in% publicInput )
+        selectionVector <- selectionVector | df$Public.Input..Key.document
+    
+    if  ( 6 %in% publicInput )
+    {
+        # TRUE means that there is at least one input method, FALSE means othe 
+        
+        others <-   df$Public.Input..Submission.to.WHS | 
+                    df$Public.Input..Survey.Results |
+                    df$Public.Input..Stakeholder.Consultation.Report |
+                    df$Public.Input..External.Conference.Report |
+                    df$Public.Input..Key.document 
+        
+        others = !others
+        
+        selectionVector <- selectionVector | others                 
+    }
+    
+    df.filtered <- df[ selectionVector, ]
+    
+    print("df.filtered")
+    print( dim(df.filtered) )
+    return (df.filtered)
 }
 
 prepNeedData <- function(df)
@@ -30,7 +54,7 @@ prepNeedData <- function(df)
      df.need.sorted <- df.need[order(-df.need$Count),]
      # sort the factor by the order of Count
      df.need.sorted$Need <- factor(df.need.sorted$Need, levels = df.need.sorted$Need)
-     return(data.table(df.need.sorted))
+     return (df.need.sorted)
 }
 
 prepTechData <- function(df)
@@ -41,7 +65,7 @@ prepTechData <- function(df)
      df.tech.sorted <- df.tech[order(-df.tech$Count),]
      # sort the factor by the order of Count
      df.tech.sorted$Technology <- factor(df.tech.sorted$Technology, levels = df.tech.sorted$Technology)
-     return(data.table(df.tech.sorted))
+     return (df.tech.sorted)
 }
     
    

@@ -37,17 +37,17 @@ shinyServer( function(input, output) {
 
     
   # filterDataFrameByCheckboxes()  
-    
-  output$distPlot <- renderPlot({
-
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2]
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-
-  })
+#     
+#   output$distPlot <- renderPlot({
+# 
+#     # generate bins based on input$bins from ui.R
+#     x    <- faithful[, 2]
+#     bins <- seq(min(x), max(x), length.out = input$bins + 1)
+# 
+#     # draw the histogram with the specified number of bins
+#     hist(x, breaks = bins, col = 'darkgray', border = 'white')
+# 
+#   })
   
   output$needBar <- renderPlot({
       
@@ -55,8 +55,6 @@ shinyServer( function(input, output) {
       
       df.filtered <- filterDataFrameByCheckboxes(df,input) 
       df.need.sorted <- prepNeedData(df.filtered)
-#       df.filtered <- reactive({ filterDataFrameByCheckboxes(df,input) })
-#       df.need.sorted <- reactive({ prepNeedData(df.filtered) })
       nNeeds <- nrow(df.need.sorted)
       print(nNeeds)
       
@@ -74,8 +72,6 @@ shinyServer( function(input, output) {
       
       df.filtered <- filterDataFrameByCheckboxes(df,input) 
       df.tech.sorted <- prepTechData(df.filtered)   
-#       df.filtered <- reactive({ filterDataFrameByCheckboxes(df,input) })
-#       df.tech.sorted <- reactive({ prepTechData(df.filtered) })
       nTech <- nrow(df.tech.sorted)
       print(nTech)
       
@@ -86,6 +82,18 @@ shinyServer( function(input, output) {
           ylab("Count") +
           geom_bar(stat="identity") +
           theme(axis.text.x = element_text(angle = 90, hjust = 1))      
+  })
+  
+  output$table <- renderTable({
+      
+#        data.frame( a = c(1,2,3), b=c(7,6,5))
+      
+      df.filtered <- filterDataFrameByCheckboxes(df,input)
+      filename <- as.data.frame(table(df.filtered$Filename))
+      names(filename)[names(filename)=="Var1"] <- "Filename"
+      names(filename)[names(filename)=="Freq"] <- "IdeasTechnologies"
+      filename <- filename[ filename$IdeasTechnologies > 0,  ]
+      data.frame(filename)
   })
    
 })
