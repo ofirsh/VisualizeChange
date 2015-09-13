@@ -61,10 +61,11 @@ shinyServer( function(input, output) {
       ggplot(data=df.need.sorted, aes(x=reorder(Need,-Count),fill = Need, y = Count)) +
           theme_grey() +
           scale_fill_manual(values = getPalette(nNeeds)) +
+          ggtitle("Ideas (Count)") + 
           xlab("Idea") +
           ylab("Count") +
           geom_bar(stat="identity") +
-          theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+          theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = "none")   
       
   })
   
@@ -78,10 +79,11 @@ shinyServer( function(input, output) {
       ggplot(data=df.tech.sorted, aes(x=reorder(Technology,-Count),y = Count, fill = Technology)) +
           scale_fill_manual(values = getPalette(nTech)) +
           theme_grey() +
+          ggtitle("Technologies (Count)") +
           xlab("Technology") +
           ylab("Count") +
           geom_bar(stat="identity") +
-          theme(axis.text.x = element_text(angle = 90, hjust = 1))      
+          theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = "none")      
   })
   
   output$table <- renderTable({
@@ -91,8 +93,8 @@ shinyServer( function(input, output) {
       df.filtered <- filterDataFrameByCheckboxes(df,input)
       filename <- as.data.frame(table(df.filtered$Filename))
       names(filename)[names(filename)=="Var1"] <- "Filename"
-      names(filename)[names(filename)=="Freq"] <- "IdeasTechnologies"
-      filename <- filename[ filename$IdeasTechnologies > 0,  ]
+      names(filename)[names(filename)=="Freq"] <- "Ideas.and.Technologies"
+      filename <- filename[ filename$Ideas.and.Technologies > 0,  ]
       data.frame(filename)
   })
    
