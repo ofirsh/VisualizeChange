@@ -67,10 +67,8 @@ shinyUI(fluidPage(
                                         "LAC Documents" = 5,
                                         "Pacific Region" = 6,
                                         "Global Documents" = 7,
-                                        "Academia" = 8,
-                                        "Multiple Stakeholders" = 9,
-                                        "Other" = 10),
-                         selected = 1:10,
+                                        "Other" = 8),
+                         selected = 1:8,
                          inline = FALSE ),
       
             checkboxGroupInput("checkGroupNationalContext", 
