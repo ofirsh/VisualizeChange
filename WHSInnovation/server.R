@@ -3,6 +3,11 @@ library(data.table)
 library(ggplot2)
 library(RColorBrewer)
 
+source("filterByCheckboxes.R")
+
+# How to deploy the app
+# deployApp()
+
 # This is the server logic for a Shiny web application.
 # You can find out more about building applications with Shiny here:
 #
@@ -11,32 +16,27 @@ library(RColorBrewer)
 
 library(shiny)
 
-shinyServer(function(input, output) {
+print("Loading file")
+df <- read.csv(file="./data/data-final.csv")
+
+#getPalette = colorRampPalette(brewer.pal(9, "Spectral"))
+getPalette = colorRampPalette(brewer.pal(9, "RdYlBu"))
+
+# df.filtered <- df
+# df.need.sorted <- df
+# df.tech.sorted <- df
+# 
+# nNeeds <- -1
+# nTech <- -1 
+
+shinyServer( function(input, output) {
     
-    df <- read.csv(file="./data/data-final.csv")
+#     Everything within this function is instantiated separately for each session. 
+#     This includes the input and output objects that are passed to it: each session has its own input and output objects, visible within this function.    
+#     Other objects inside the function, such as variables and functions, are also instantiated for each session. 
+
     
-    # prep the needgraph
-    df.need <- as.data.frame(table(df$Need))
-    names(df.need)[names(df.need)=="Var1"] <- "Need"
-    names(df.need)[names(df.need)=="Freq"] <- "Count"
-    df.need.sorted <- df.need[order(-df.need$Count),]
-    # sort the factor by the order of Count
-    df.need.sorted$Need <- factor(df.need.sorted$Need, levels = df.need.sorted$Need)  
-    nNeeds <- nrow(df.need.sorted)
-    #getPalette = colorRampPalette(brewer.pal(9, "Spectral"))
-    getPalette = colorRampPalette(brewer.pal(9, "RdYlBu"))
-    
-    # prep the technology data
-    df.tech <- as.data.frame(table(df$Technology))
-    names(df.tech)[names(df.tech)=="Var1"] <- "Technology"
-    names(df.tech)[names(df.tech)=="Freq"] <- "Count"
-    
-    df.tech.sorted <- df.tech[order(-df.tech$Count),]
-    
-    # sort the factor by the order of Count
-    df.tech.sorted$Technology <- factor(df.tech.sorted$Technology, levels = df.tech.sorted$Technology)
-    
-    nTech <- nrow(df.tech.sorted)
+  # filterDataFrameByCheckboxes()  
     
   output$distPlot <- renderPlot({
 
@@ -50,10 +50,20 @@ shinyServer(function(input, output) {
   })
   
   output$needBar <- renderPlot({
+      
+      # http://shiny.rstudio.com/articles/reactivity-overview.html
+      
+      df.filtered <- filterDataFrameByCheckboxes(df,input) 
+      df.need.sorted <- prepNeedData(df.filtered)
+#       df.filtered <- reactive({ filterDataFrameByCheckboxes(df,input) })
+#       df.need.sorted <- reactive({ prepNeedData(df.filtered) })
+      nNeeds <- nrow(df.need.sorted)
+      print(nNeeds)
+      
       ggplot(data=df.need.sorted, aes(x=reorder(Need,-Count),fill = Need, y = Count)) +
           theme_grey() +
           scale_fill_manual(values = getPalette(nNeeds)) +
-          xlab("Need") +
+          xlab("Idea") +
           ylab("Count") +
           geom_bar(stat="identity") +
           theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
@@ -61,6 +71,14 @@ shinyServer(function(input, output) {
   })
   
   output$technologyBar <- renderPlot({
+      
+      df.filtered <- filterDataFrameByCheckboxes(df,input) 
+      df.tech.sorted <- prepTechData(df.filtered)   
+#       df.filtered <- reactive({ filterDataFrameByCheckboxes(df,input) })
+#       df.tech.sorted <- reactive({ prepTechData(df.filtered) })
+      nTech <- nrow(df.tech.sorted)
+      print(nTech)
+      
       ggplot(data=df.tech.sorted, aes(x=reorder(Technology,-Count),y = Count, fill = Technology)) +
           scale_fill_manual(values = getPalette(nTech)) +
           theme_grey() +
@@ -69,7 +87,10 @@ shinyServer(function(input, output) {
           geom_bar(stat="identity") +
           theme(axis.text.x = element_text(angle = 90, hjust = 1))      
   })
-  
-
-
+   
 })
+
+
+
+
+
